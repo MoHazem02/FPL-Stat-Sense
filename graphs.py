@@ -27,7 +27,7 @@ players['goal_involvements'] = players['goals_scored'] + players['assists']
 players_filtered = players[(players['minutes'] >= 360) & (players['ppg'] > 0)]
 
 # --- Descriptive Statistics ---
-descriptive_stats = players_filtered[['ppg', 'expected_goal_involvements', 'goal_involvements', 'minutes', 'now_cost']].describe()
+descriptive_stats = players_filtered[['ppg', 'total_points', 'goal_involvements', 'minutes', 'now_cost']].describe()
 
 # --- Visualization ---
 plt.figure(figsize=(14, 12))
