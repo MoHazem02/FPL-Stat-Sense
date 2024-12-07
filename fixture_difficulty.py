@@ -54,6 +54,8 @@ def get_premier_league_standings():
                 team = 'Man City'
             elif team == 'Newcastle Utd':
                 team = 'Newcastle'
+            elif team == 'Leicester City':
+                team = 'Leicester'
 
             rows.append([rank, team, xg])
         
@@ -83,8 +85,6 @@ def get_team_ranking_adjustment(team_name):
     # Get the standings
     standings = get_premier_league_standings()
     
-    while(standings is None):
-        standings = get_premier_league_standings()
     team_row = standings[standings['Team'] == team_name]
     
     # Convert rank to integer
@@ -130,7 +130,7 @@ if __name__ == "__main__":
         
         # Example of using the new ranking adjustment function
         print("\nTeam Ranking Adjustments:")
-        example_teams = ["Bournemouth", "Liverpool", "Arsenal", "Tottenham", "Crystal Palace"]
+        example_teams = ["Bournemouth", "Liverpool", "Arsenal", "Spurs", "Crystal Palace"]
         for team in example_teams:
             adjustment = get_team_ranking_adjustment(team)
             print(f"{team}: {adjustment} point adjustment")

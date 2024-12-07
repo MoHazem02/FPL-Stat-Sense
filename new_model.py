@@ -124,7 +124,7 @@ def display_top_players(player_data):
         go.Bar(x=names, y=points, text=points, textposition='auto')
     ])
     fig.update_layout(
-        title="Top 10 Players by Projected Points",
+        title="Top 50 Players by Projected Points",
         xaxis_title="Players",
         yaxis_title="Projected Points",
         template="plotly_dark"
