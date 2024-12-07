@@ -141,6 +141,61 @@ class FantasyPremierLeaguePredictor:
         plt.title('Actual vs Predicted Points')
         plt.show()
 
+    def plot_top_predicted_players(self, top_players):
+        # Plotting the Top 10 predicted players
+        plt.figure(figsize=(12, 6))
+        sns.barplot(x='predicted_points', y='web_name', data=top_players, palette='viridis')
+        plt.xlabel('Predicted Points')
+        plt.ylabel('Player')
+        plt.title('Top 10 Predicted Fantasy Premier League Players')
+        plt.show()
+
+    import seaborn as sns
+
+    def show_top_10_predicted_vs_actual(self, top_players):
+        """
+        Displays a bar chart for the top 10 players showing predicted and actual points.
+
+        :param top_players: DataFrame containing top players with 'web_name',
+                            'predicted_points', and 'total_points'.
+        """
+        # Extract data for plotting
+        player_names = top_players['web_name']
+        predicted_points = top_players['predicted_points']
+        actual_points = top_players['total_points']
+
+        # Plot the data
+        bar_width = 0.35
+        indices = range(len(player_names))
+
+        plt.figure(figsize=(14, 8))
+        sns.set_theme(style="whitegrid")
+
+        # Plot predicted and actual points
+        plt.bar(indices, predicted_points, bar_width, label='Predicted Points', color='#4CAF50', alpha=0.8)
+        plt.bar([i + bar_width for i in indices], actual_points, bar_width, label='Actual Points', color='#2196F3',
+                alpha=0.8)
+
+        # Add annotations for predicted points
+        for i, val in enumerate(predicted_points):
+            plt.text(i, val + 1, f"{val:.1f}", ha='center', va='bottom', fontsize=10, color='black')
+
+        # Add annotations for actual points
+        for i, val in enumerate(actual_points):
+            plt.text(i + bar_width, val + 1, f"{val:.1f}", ha='center', va='bottom', fontsize=10, color='black')
+
+        # Add labels, title, and legend
+        plt.xlabel("Players", fontsize=14)
+        plt.ylabel("Points", fontsize=14)
+        plt.title("Top 10 Players: Predicted vs Actual Points", fontsize=16, fontweight='bold')
+        plt.xticks([i + bar_width / 2 for i in indices], player_names, rotation=45, ha='right', fontsize=12)
+        plt.legend(fontsize=12)
+
+        # Add gridlines
+        plt.grid(axis='y', linestyle='--', alpha=0.7)
+        plt.tight_layout()
+        plt.show()
+
     def get_top_predicted_players(self, model, scaler, n=10):
         players = self.player_data.copy()
         players['predicted_points'] = players.apply(
@@ -154,6 +209,10 @@ class FantasyPremierLeaguePredictor:
         top_players = players.dropna(subset=['predicted_points']) \
             .sort_values('predicted_points', ascending=False) \
             .head(n)
+
+        # Plot the top predicted players
+        self.plot_top_predicted_players(top_players)
+
         return top_players[['web_name', 'predicted_points', 'total_points']]
 
     def predict_player_points(self, model, scaler, player_features):
@@ -179,6 +238,9 @@ def main():
     print("\nGetting Top Predicted Players...")
     top_players = predictor.get_top_predicted_players(model, scaler)
     print("\nTop Predicted Players:\n", top_players)
+
+    predictor.show_top_10_predicted_vs_actual(top_players)
+
 
 
 if __name__ == "__main__":
