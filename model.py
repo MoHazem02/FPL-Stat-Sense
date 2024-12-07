@@ -6,6 +6,9 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import statsmodels.api as sm
 import requests
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 
 class FantasyPremierLeaguePredictor:
     def __init__(self):
@@ -52,34 +55,41 @@ class FantasyPremierLeaguePredictor:
             'minutes', 'goals_scored', 'assists', 'clean_sheets',
             'influence', 'creativity', 'threat', 'form'
         ]
-        # Drop rows with missing values
         clean_data = self.player_data.dropna(subset=features + ['total_points'])
 
-        # Ensure all columns are numeric
         for col in features + ['total_points']:
             clean_data[col] = pd.to_numeric(clean_data[col], errors='coerce')
 
-        # Separate predictors (X) and target (y)
         X = clean_data[features]
         y = clean_data['total_points']
-
-        # Add constant term for intercept
         X = sm.add_constant(X)
 
-        # Check for empty data
         if X.empty or y.empty:
             raise ValueError("Input data for OLS regression is empty. Check for missing values.")
 
-        # Fit the OLS model
         model = sm.OLS(y, X).fit()
 
         # Display summary
         print(model.summary())
 
-        # Select significant features based on p-values
+        # Create a DataFrame with feature names and their corresponding p-values
+        p_values_df = pd.DataFrame({
+            'Feature': features,
+            'P-Value': model.pvalues[1:]  # exclude constant
+        })
+
+        # Plot p-values for feature selection
+        plt.figure(figsize=(10, 6))
+        sns.barplot(x='P-Value', y='Feature', data=p_values_df, palette='viridis')
+        plt.axvline(x=0.05, color='r', linestyle='--')  # Threshold line at p-value = 0.05
+        plt.title('P-Values for Feature Selection')
+        plt.xlabel('P-Value')
+        plt.ylabel('Feature')
+        plt.show()
+
+        # Select features with p-values below 0.05 (significant)
         significant_features = [features[i] for i in range(len(features)) if model.pvalues[i + 1] < 0.05]
         self.selected_features = significant_features
-
         print("\nSelected Features Based on Statistical Analysis:", self.selected_features)
 
     def prepare_training_data(self):
@@ -104,7 +114,7 @@ class FantasyPremierLeaguePredictor:
         mae = mean_absolute_error(y_test, y_pred)
         rmse = np.sqrt(mean_squared_error(y_test, y_pred))
         print(f"Model Performance:\nMAE: {mae:.2f}, RMSE: {rmse:.2f}")
-        return rf_model, scaler
+        return rf_model, scaler, y_test, y_pred
 
     def display_feature_importances(self, model):
         importances = model.feature_importances_
@@ -113,6 +123,23 @@ class FantasyPremierLeaguePredictor:
             'Importance': importances
         }).sort_values('Importance', ascending=False)
         print("\nFeature Importances:\n", feature_importance_df)
+
+        # Plot feature importances
+        plt.figure(figsize=(10, 6))
+        plt.barh(feature_importance_df['Feature'], feature_importance_df['Importance'], color='skyblue')
+        plt.xlabel('Importance')
+        plt.title('Feature Importances')
+        plt.gca().invert_yaxis()  # Invert y-axis so the most important feature is at the top
+        plt.show()
+
+    def plot_actual_vs_predicted(self, y_test, y_pred):
+        plt.figure(figsize=(10, 6))
+        plt.scatter(y_test, y_pred, color='blue', alpha=0.6)
+        plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linestyle='--')
+        plt.xlabel('Actual Points')
+        plt.ylabel('Predicted Points')
+        plt.title('Actual vs Predicted Points')
+        plt.show()
 
     def get_top_predicted_players(self, model, scaler, n=10):
         players = self.player_data.copy()
@@ -134,17 +161,25 @@ class FantasyPremierLeaguePredictor:
         predicted_points = model.predict(player_features_scaled)
         return predicted_points[0]
 
+
 def main():
     predictor = FantasyPremierLeaguePredictor()
     predictor.fetch_player_data()
     print("Performing Statistical Analysis for Feature Selection...")
     predictor.perform_statistical_analysis()
     print("\nTraining Random Forest Model...")
-    model, scaler = predictor.train_model()
+    model, scaler, y_test, y_pred = predictor.train_model()
+
+    # Display feature importances
     predictor.display_feature_importances(model)
+
+    # Plot Actual vs Predicted
+    predictor.plot_actual_vs_predicted(y_test, y_pred)
+
     print("\nGetting Top Predicted Players...")
     top_players = predictor.get_top_predicted_players(model, scaler)
     print("\nTop Predicted Players:\n", top_players)
+
 
 if __name__ == "__main__":
     main()
