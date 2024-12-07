@@ -75,16 +75,30 @@ plt.title('Correlation Matrix')
 plt.show()
 
 # --- 4. Group-wise Analysis ---
-group_stats = players_filtered.groupby('position')[['ppg', 'total_points', 'minutes', 'now_cost']].mean()
+position_stats = players_filtered.groupby('position').agg({
+    
+    
+    'minutes': ['mean', 'median', 'var', 'std', 'max']
+})
+
+
 
 # Display Descriptive Statistics
 print("Descriptive Statistics:")
 print(descriptive_stats)
 
 print("\nGroup-wise Averages by Position:")
-print(group_stats)
+print(position_stats)
 
 # --- 5. Top Performers ---
 top_performers = players_filtered.nlargest(10, 'ppg')[['web_name', 'ppg', 'total_points', 'minutes', 'position', 'now_cost']]
 print("\nTop Performers by PPG:")
 print(top_performers)
+correlation_ppg_total_points = correlation_matrix.loc['ppg', 'total_points']
+correlation_cost_total_points = correlation_matrix.loc['now_cost', 'total_points']
+correlation_minutes_cost = correlation_matrix.loc['minutes', 'now_cost']
+
+# Print results
+print(f"Correlation between Total Points and PPG: {correlation_ppg_total_points:.2f}")
+print(f"Correlation between Cost and Total Points: {correlation_cost_total_points:.2f}")
+print(f"Correlation between Minutes and Cost: {correlation_minutes_cost:.2f}")

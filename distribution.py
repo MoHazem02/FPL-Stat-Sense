@@ -38,25 +38,25 @@ players_filtered['pp90'] = players_filtered.apply(
     lambda x: (x['total_points'] / x['minutes']) * 90 if x['minutes'] > 0 else 0, axis=1
 )
 
-# Select the top 50 players based on PP90
-top_50_players = players_filtered.nlargest(50, 'pp90')
+# Select the top 100 players based on PP90
+top_100_players = players_filtered.nlargest(100, 'pp90')
 
-# Plot 1: Distribution of Positions Among Top 50 Players
+# Plot 1: Distribution of Positions Among Top 100 Players
 plt.figure(figsize=(12, 6))
-position_counts = top_50_players['position'].value_counts()  # Get position counts
+position_counts = top_100_players['position'].value_counts()  # Get position counts
 sns.barplot(x=position_counts.index, y=position_counts.values, palette='viridis')
 
-plt.title('Distribution of Positions Among Top 50 Players (Based on Points Per match)', fontsize=16)
+plt.title('Distribution of Positions Among Top 100 Players (Based on Points Per match)', fontsize=16)
 plt.xlabel('Position', fontsize=12)
 plt.ylabel('Number of Players', fontsize=12)
 plt.bar_label(plt.gca().containers[0])  # Add value labels to bars
 plt.grid(axis='y', alpha=0.3)
 
-# Plot 2: PP90 Distribution by Position for Top 50 Players
+# Plot 2: PP90 Distribution by Position for Top 100 Players
 plt.figure(figsize=(12, 6))
-sns.boxplot(data=top_50_players, x='position', y='pp90', palette='viridis')
+sns.boxplot(data=top_100_players, x='position', y='pp90', palette='viridis')
 
-plt.title(' Distribution by Position for Top 50 Players (Based on Points Per match)', fontsize=16)
+plt.title(' Distribution by Position for Top 100 Players (Based on Points Per match)', fontsize=16)
 plt.xlabel('Position', fontsize=12)
 plt.ylabel('Points Per 90 Minutes', fontsize=12)
 plt.grid(axis='y', alpha=0.3)
